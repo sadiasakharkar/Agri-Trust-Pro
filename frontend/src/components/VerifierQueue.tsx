@@ -67,18 +67,28 @@ export function VerifierQueue() {
 
   return (
     <section className="card">
-      <h3>Verifier Review Queue</h3>
-      <p className="small">For NGO/FPO/verifier workflows.</p>
-      {!items.length && <p className="small">No evidence records found.</p>}
+      <div className="section-head">
+        <div>
+          <p className="eyebrow">Verifier Desk</p>
+          <h3>Evidence Review Queue</h3>
+        </div>
+        <button className="secondary-button" type="button" onClick={() => void loadQueue()}>
+          Refresh
+        </button>
+      </div>
+
+      {!items.length && <p className="small">No evidence records available.</p>}
+
       {items.map((item) => (
         <div key={item.id} className="queue-item">
-          <p>
-            <strong>{item.farmerId}</strong> | {item.latitude}, {item.longitude}
-          </p>
-          <p>Soil C: {item.soilOrganicCarbon}%</p>
-          <p className="small">{item.note || "No note"}</p>
-          <p className="small">Status: {item.reviewStatus || "pending"}</p>
-          <div className="button-row">
+          <div className="data-row">
+            <strong>{item.farmerId}</strong>
+            <span className="status-chip">{item.reviewStatus || "pending"}</span>
+          </div>
+          <p className="small">Coordinates: {item.latitude}, {item.longitude}</p>
+          <p className="small">Soil C: {item.soilOrganicCarbon}%</p>
+          <p className="small">{item.note || "No note provided"}</p>
+          <div className="button-row compact">
             <button className="secondary-button" type="button" onClick={() => review(item, "approved")}>
               Approve
             </button>
@@ -88,7 +98,8 @@ export function VerifierQueue() {
           </div>
         </div>
       ))}
-      {status && <p className="small">{status}</p>}
+
+      {status && <p className="status-inline">{status}</p>}
     </section>
   );
 }

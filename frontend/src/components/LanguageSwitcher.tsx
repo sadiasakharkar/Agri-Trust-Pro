@@ -11,7 +11,7 @@ export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
 
   return (
-    <div className="pill-row">
+    <div className="pill-row" aria-label="Language switcher">
       {options.map((option) => (
         <button
           key={option.key}

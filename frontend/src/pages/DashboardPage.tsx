@@ -3,9 +3,9 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 import { fetchMrvEstimate, fetchRecommendations, parseVoiceIntent } from "../api/aiClient";
 import { db } from "../api/firebase";
+import { EvidenceRecorder } from "../components/EvidenceRecorder";
 import { MrvCard } from "../components/MrvCard";
 import { RecommendationList } from "../components/RecommendationList";
-import { EvidenceRecorder } from "../components/EvidenceRecorder";
 import { VerifierQueue } from "../components/VerifierQueue";
 import { INDIA_STATES } from "../constants/india";
 import { useLanguage } from "../context/LanguageContext";
@@ -35,6 +35,8 @@ interface QueuedCall {
     objective?: Objective;
   };
 }
+
+const objectives: Objective[] = ["carbon", "yield", "cost", "water"];
 
 export function DashboardPage() {
   const { t, language } = useLanguage();
@@ -72,12 +74,12 @@ export function DashboardPage() {
       const payload = { ...profile, language };
       const result = await fetchMrvEstimate(payload, selectedPractices);
       setMrv(result);
-      setStatusMessage("Carbon estimate updated.");
+      setStatusMessage("Carbon estimate updated successfully.");
       await persistMrv(result);
     } catch (error) {
       console.error(error);
       enqueue("mrv_estimate", { profile: { ...profile, language }, practices: selectedPractices });
-      setStatusMessage("No internet or server issue. Estimate request queued.");
+      setStatusMessage("Network issue detected. Carbon request is queued.");
     }
   };
 
@@ -85,11 +87,11 @@ export function DashboardPage() {
     try {
       const result = await fetchRecommendations({ ...profile, language }, objective);
       setRecommendations(result.recommendations);
-      setStatusMessage("Recommendations updated.");
+      setStatusMessage("Recommendations are ready.");
     } catch (error) {
       console.error(error);
       enqueue("recommendations", { profile: { ...profile, language }, objective });
-      setStatusMessage("No internet or server issue. Recommendation request queued.");
+      setStatusMessage("Network issue detected. Recommendation request is queued.");
     }
   };
 
@@ -115,7 +117,7 @@ export function DashboardPage() {
       }
     }
 
-    setStatusMessage("Queued actions synced.");
+    setStatusMessage("Pending actions synced.");
   };
 
   const onVoiceStart = () => {
@@ -136,39 +138,65 @@ export function DashboardPage() {
   };
 
   return (
-    <main className="dashboard-layout">
+    <main className="dashboard-shell">
       <section className="hero-card">
-        <h2>{t("dashboard")}</h2>
-        <p className="small">Step 1: Select location and farm details</p>
+        <div className="section-head">
+          <div>
+            <p className="eyebrow">Farmer Workspace</p>
+            <h2>{t("dashboard")}</h2>
+          </div>
+          <span className={isOnline ? "status-chip online" : "status-chip offline"}>{isOnline ? "Online" : "Offline"}</span>
+        </div>
 
-        <p>State</p>
-        <select value={profile.state} onChange={(e) => setProfile({ ...profile, state: e.target.value })}>
-          {INDIA_STATES.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
+        <div className="form-grid">
+          <div className="form-block">
+            <label className="field-label" htmlFor="state">
+              State
+            </label>
+            <select id="state" value={profile.state} onChange={(e) => setProfile({ ...profile, state: e.target.value })}>
+              {INDIA_STATES.map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-block">
+            <label className="field-label" htmlFor="district">
+              District
+            </label>
+            <input id="district" value={profile.district} onChange={(e) => setProfile({ ...profile, district: e.target.value })} />
+          </div>
+
+          <div className="form-block">
+            <label className="field-label" htmlFor="farm-size">
+              Farm Size (ha)
+            </label>
+            <input
+              id="farm-size"
+              type="number"
+              min={0.1}
+              step={0.1}
+              value={profile.farm_size_hectares}
+              onChange={(e) => setProfile({ ...profile, farm_size_hectares: Number(e.target.value) })}
+            />
+          </div>
+        </div>
+
+        <p className="field-label">Main Goal</p>
+        <div className="segmented-row">
+          {objectives.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={objective === item ? "segment active" : "segment"}
+              onClick={() => setObjective(item)}
+            >
+              {item}
+            </button>
           ))}
-        </select>
-
-        <p>District</p>
-        <input value={profile.district} onChange={(e) => setProfile({ ...profile, district: e.target.value })} />
-
-        <p>Farm size (ha)</p>
-        <input
-          type="number"
-          min={0.1}
-          step={0.1}
-          value={profile.farm_size_hectares}
-          onChange={(e) => setProfile({ ...profile, farm_size_hectares: Number(e.target.value) })}
-        />
-
-        <p>Step 2: Choose your objective</p>
-        <select value={objective} onChange={(e) => setObjective(e.target.value as Objective)}>
-          <option value="carbon">Carbon</option>
-          <option value="yield">Yield</option>
-          <option value="cost">Cost</option>
-          <option value="water">Water</option>
-        </select>
+        </div>
 
         <div className="button-row">
           <button className="primary-button" type="button" onClick={onEstimate}>
@@ -179,39 +207,38 @@ export function DashboardPage() {
           </button>
         </div>
 
-        <p className="small">Step 3: Voice help (works best in quiet place)</p>
-        <div className="button-row">
-          <button className="voice-button" type="button" onClick={onVoiceStart}>
-            {isListening ? t("stop") : t("listen")}
-          </button>
-          {isListening && (
-            <button className="secondary-button" type="button" onClick={stopListening}>
-              {t("stop")}
+        <div className="voice-panel">
+          <p className="small">Need help? Speak naturally and get guided support.</p>
+          <div className="button-row compact">
+            <button className="voice-button" type="button" onClick={onVoiceStart}>
+              {isListening ? t("stop") : t("listen")}
             </button>
-          )}
+            {isListening && (
+              <button className="secondary-button" type="button" onClick={stopListening}>
+                {t("stop")}
+              </button>
+            )}
+          </div>
+          {voiceText && <p className="small">Heard: {voiceText}</p>}
         </div>
 
         <div className="sync-row">
-          <span className={isOnline ? "status-chip online" : "status-chip offline"}>
-            {isOnline ? "Online" : "Offline"}
-          </span>
           <span className="status-chip">Queued: {items.length}</span>
-          <span className="status-chip">
-            Retries: {items.reduce((sum, item) => sum + item.retryCount, 0)}
-          </span>
+          <span className="status-chip">Retries: {items.reduce((sum, item) => sum + item.retryCount, 0)}</span>
           <button className="secondary-button" type="button" onClick={syncQueue} disabled={!isOnline || !items.length}>
             Sync Pending
           </button>
         </div>
 
-        {voiceText && <p className="small">Heard: {voiceText}</p>}
-        {statusMessage && <p className="small">{statusMessage}</p>}
+        {statusMessage && <p className="status-inline">{statusMessage}</p>}
       </section>
 
-      <MrvCard result={mrv} />
-      <RecommendationList items={recommendations} />
-      <EvidenceRecorder farmerId={profile.farmer_id} />
-      <VerifierQueue />
+      <section className="content-grid">
+        <MrvCard result={mrv} />
+        <RecommendationList items={recommendations} />
+        <EvidenceRecorder farmerId={profile.farmer_id} />
+        <VerifierQueue />
+      </section>
     </main>
   );
 }

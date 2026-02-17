@@ -19,12 +19,16 @@ function AppShell() {
   return (
     <div className="app-container">
       <header className="topbar">
-        <div>
+        <div className="brand-block">
+          <p className="eyebrow">Agri-Trust Platform</p>
           <h1>{t("appTitle")}</h1>
-          <p>{t("tagline")}</p>
+          <p className="subtitle">{t("tagline")}</p>
         </div>
-        <LanguageSwitcher />
+        <div className="topbar-controls">
+          <LanguageSwitcher />
+        </div>
       </header>
+
       {isAuthenticated ? <DashboardPage /> : <LoginPage onAuthenticated={() => setIsAuthenticated(true)} />}
     </div>
   );

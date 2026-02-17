@@ -29,7 +29,7 @@ export function EvidenceRecorder({ farmerId }: { farmerId: string }) {
         createdAt: serverTimestamp(),
       });
 
-      setStatus("Evidence saved.");
+      setStatus("Evidence saved for verification.");
     } catch (error) {
       console.error(error);
       setStatus("Unable to save evidence now.");
@@ -38,17 +38,31 @@ export function EvidenceRecorder({ farmerId }: { farmerId: string }) {
 
   return (
     <section className="card">
-      <h3>Evidence Record</h3>
-      <p className="small">Geo-tag + soil test entries for audit-ready MRV.</p>
+      <p className="eyebrow">Evidence</p>
+      <h3>Field Evidence Record</h3>
+      <p className="small">Add geo-coordinates and soil details to support MRV audits.</p>
 
-      <p>Latitude</p>
-      <input type="number" value={latitude} onChange={(e) => setLatitude(Number(e.target.value))} />
+      <div className="form-grid compact-grid">
+        <div className="form-block">
+          <label className="field-label" htmlFor="latitude">
+            Latitude
+          </label>
+          <input id="latitude" type="number" value={latitude} onChange={(e) => setLatitude(Number(e.target.value))} />
+        </div>
 
-      <p>Longitude</p>
-      <input type="number" value={longitude} onChange={(e) => setLongitude(Number(e.target.value))} />
+        <div className="form-block">
+          <label className="field-label" htmlFor="longitude">
+            Longitude
+          </label>
+          <input id="longitude" type="number" value={longitude} onChange={(e) => setLongitude(Number(e.target.value))} />
+        </div>
+      </div>
 
-      <p>Soil organic carbon (%)</p>
+      <label className="field-label" htmlFor="soil-carbon">
+        Soil Organic Carbon (%)
+      </label>
       <input
+        id="soil-carbon"
         type="number"
         min={0}
         max={10}
@@ -57,13 +71,15 @@ export function EvidenceRecorder({ farmerId }: { farmerId: string }) {
         onChange={(e) => setSoilOrganicCarbon(Number(e.target.value))}
       />
 
-      <p>Field note</p>
-      <input value={note} onChange={(e) => setNote(e.target.value)} />
+      <label className="field-label" htmlFor="field-note">
+        Field Note
+      </label>
+      <input id="field-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Crop stage, irrigation, residue status" />
 
       <button className="secondary-button" type="button" onClick={saveEvidence}>
         Save Evidence
       </button>
-      {status && <p className="small">{status}</p>}
+      {status && <p className="status-inline">{status}</p>}
     </section>
   );
 }

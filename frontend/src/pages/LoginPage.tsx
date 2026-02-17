@@ -14,15 +14,18 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
   const [otp, setOtp] = useState("");
   const [confirmation, setConfirmation] = useState<any>(null);
   const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
 
   const recaptchaId = useMemo(() => "recaptcha-container", []);
 
   const sendOtp = async () => {
     setError("");
+    setStatus("");
     try {
       const verifier = new RecaptchaVerifier(auth, recaptchaId, { size: "invisible" });
       const result = await signInWithPhoneNumber(auth, phone, verifier);
       setConfirmation(result);
+      setStatus("OTP sent successfully. Please enter the code.");
     } catch (err) {
       setError("Could not send OTP. Check Firebase setup.");
       console.error(err);
@@ -31,6 +34,8 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
 
   const verifyOtp = async () => {
     if (!confirmation) return;
+    setError("");
+    setStatus("");
     try {
       await confirmation.confirm(otp);
       onAuthenticated();
@@ -43,23 +48,30 @@ export function LoginPage({ onAuthenticated }: LoginPageProps) {
   return (
     <main className="auth-layout">
       <section className="card auth-card">
-        <h1>{t("login")}</h1>
-        <label>
+        <p className="eyebrow">Secure Sign In</p>
+        <h2>{t("login")}</h2>
+        <p className="small">Use your registered mobile number for easy, secure access.</p>
+
+        <label className="field-label" htmlFor="phone-input">
           {t("phone")}
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
         </label>
-        <button type="button" onClick={sendOtp} className="primary-button">
+        <input id="phone-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91XXXXXXXXXX" />
+
+        <button type="button" onClick={sendOtp} className="primary-button full-width">
           {t("sendOtp")}
         </button>
 
-        <label>
+        <label className="field-label" htmlFor="otp-input">
           OTP
-          <input value={otp} onChange={(e) => setOtp(e.target.value)} />
         </label>
-        <button type="button" onClick={verifyOtp} className="secondary-button">
+        <input id="otp-input" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="6-digit code" />
+
+        <button type="button" onClick={verifyOtp} className="secondary-button full-width">
           {t("verifyOtp")}
         </button>
+
         <div id={recaptchaId} />
+        {status && <p className="status-inline">{status}</p>}
         {error && <p className="error-text">{error}</p>}
       </section>
     </main>
