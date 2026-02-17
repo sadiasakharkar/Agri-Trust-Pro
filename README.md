@@ -1,62 +1,60 @@
 # Agri-Trust: AI-Driven Carbon MRV Platform for Indian Smallholder Farmers
 
-This repository is a full-stack implementation scaffold for an industry-grade farmer platform combining:
-- Farmer-first multilingual frontend (Hindi, Marathi, English)
-- FastAPI AI service (MRV estimation, recommendations, voice intent)
-- Firebase backend (Phone OTP auth, Firestore, Cloud Functions)
+Production-style full-stack project combining farmer-first UX, FastAPI AI services, and Firebase backend primitives.
 
-## 1. Monorepo Structure
+## Stack
+- Frontend: React + TypeScript + Vite + PWA shell
+- AI backend: FastAPI + model registry + training pipeline scaffold
+- Data/backend: Firebase Auth, Firestore, Cloud Functions
+- Delivery: Docker Compose + GitHub Actions CI/CD
 
-- `ai-service/` FastAPI AI APIs and model logic
-- `frontend/` React web app optimized for mobile farmer usage
-- `firebase/` Firestore rules/indexes + Cloud Function integration layer
-- `docs/` architecture and API contracts
-- `docker-compose.yml` local multi-service run
+## Repository Structure
+- `ai-service/` FastAPI APIs, services, model artifacts, tests
+- `ai-service/ml/` model training scripts and pipeline docs
+- `frontend/` multilingual farmer app with voice and offline queue
+- `firebase/` Firestore rules/indexes and serverless integration relay
+- `.github/workflows/` CI and staging deploy workflows
+- `docs/` architecture/API and dataset schema docs
 
-## 2. Industry-Level Architecture
+## Implemented Capabilities
 
-1. User logs in with Firebase phone OTP.
-2. Frontend collects farm profile and local language preferences.
-3. Frontend calls FastAPI for:
-   - Carbon MRV estimate
-   - Practice recommendations
-   - Voice intent understanding
-4. Results are stored in Firestore for history and analytics.
-5. Vishnu voice integration calls Firebase Cloud Function, which securely proxies to FastAPI.
+### Farmer App
+- Hindi/Marathi/English language switching
+- Phone OTP authentication via Firebase
+- Guided farm profile workflow for low-literacy users
+- Voice input + spoken response loop
+- Offline queue for failed requests and manual sync action
+- PWA manifest and service worker registration
+- Evidence capture form (geo + soil) for MRV audit trails
 
-## 3. Key Features Implemented
+### FastAPI AI Service
+- `POST /api/v1/mrv/estimate`
+- `POST /api/v1/mrv/evidence/validate`
+- `POST /api/v1/recommendations`
+- `POST /api/v1/voice/intent`
+- `POST /api/v1/integrations/vishnu/webhook`
+- Request tracing (`X-Request-ID`), rate limiting, centralized error handling
+- Optional auth enforcement:
+  - `AUTH_REQUIRED=false` (default dev)
+  - `AUTH_PROVIDER=dev|firebase`
 
-### Frontend (Farmer-Centric UX)
-- Large touch targets and high-contrast interface
-- Hindi/Marathi/English language toggle
-- Voice input + spoken responses (browser speech APIs)
-- Phone OTP login flow with Firebase Auth
-- Dashboard for carbon estimate and actionable recommendations
+### Model Pipeline
+- Hybrid inference path: model artifact if available, heuristic fallback otherwise
+- Training script: `ai-service/ml/train_mrv_model.py`
+- Artifact registry:
+  - `ai-service/app/models/artifacts/mrv_model.joblib`
+  - `ai-service/app/models/artifacts/mrv_model_meta.json`
 
-### AI Service (FastAPI)
-- `/api/v1/mrv/estimate` hybrid heuristic carbon estimate
-- `/api/v1/recommendations` objective-based practice recommender
-- `/api/v1/voice/intent` multilingual intent parsing
-- `/api/v1/integrations/vishnu/webhook` webhook endpoint with secret header validation
-- Unit tests for core APIs
+### Firebase
+- Security rules for `farmers`, `mrv_estimates`, `voice_sessions`, `evidence_uploads`, `soil_tests`, `audit_trail`
+- Cloud Function relay for Vishnu voice webhook orchestration
 
-### Firebase Backend
-- Firestore security rules for farmer-scoped access
-- Firestore indexes for MRV query performance
-- Cloud Function webhook relay for external voice orchestration
+## Local Setup
 
-## 4. Setup Instructions
-
-## Prerequisites
-- Node.js 20+
-- Python 3.11+
-- Firebase CLI
-- Docker (optional)
-
-## A. FastAPI AI Service
+### 1. AI Service
 ```bash
 cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/ai-service
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
@@ -66,10 +64,11 @@ uvicorn app.main:app --reload --port 8000
 Run tests:
 ```bash
 cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/ai-service
+source .venv/bin/activate
 pytest
 ```
 
-## B. Frontend
+### 2. Frontend
 ```bash
 cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/frontend
 npm install
@@ -77,39 +76,39 @@ cp .env.example .env
 npm run dev
 ```
 
-Add your Firebase project credentials in `frontend/.env`.
-
-## C. Firebase
+### 3. Firebase Functions
 ```bash
 cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/firebase/functions
 npm install
 npm run build
 ```
 
-From `/Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/firebase`:
+Deploy backend config:
 ```bash
+cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust/firebase
 firebase deploy --only firestore:rules,firestore:indexes,functions
 ```
 
-Set environment variables for Cloud Functions:
-- `AI_SERVICE_BASE_URL`
-- `VISHNU_WEBHOOK_SECRET`
-
-## D. Docker Compose (optional local run)
+### 4. Docker Compose
 ```bash
 cd /Users/sadiasakharkar/Hackathons/Tech-Fiesta/Agri-Trust
 docker compose up --build
 ```
 
-## 5. Environment Variables
+## Environment Variables
 
-## `ai-service/.env`
+### `ai-service/.env`
 - `APP_ENV`
 - `ALLOWED_ORIGINS`
 - `DEFAULT_LANGUAGE`
 - `VISHNU_WEBHOOK_SECRET`
+- `AUTH_REQUIRED`
+- `AUTH_PROVIDER`
+- `DEV_BEARER_TOKEN`
+- `RATE_LIMIT_PER_MINUTE`
+- `RATE_LIMIT_WINDOW_SECONDS`
 
-## `frontend/.env`
+### `frontend/.env`
 - `VITE_AI_API_BASE`
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
@@ -118,27 +117,19 @@ docker compose up --build
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
-## 6. Data Collections (Firestore)
+## CI/CD
+- CI workflow: `.github/workflows/ci.yml`
+  - FastAPI tests
+  - Frontend build
+  - Firebase functions build
+- Staging deployment workflow: `.github/workflows/deploy-staging.yml`
+  - Manual trigger
+  - Firebase deploy via GitHub secrets
 
-- `farmers/{farmerId}` profile, language, agronomic metadata
-- `mrv_estimates/{docId}` estimated outputs, model version, timestamp
-- `voice_sessions/{sessionId}` voice conversation state and last intent
+Required GitHub secrets:
+- `FIREBASE_TOKEN`
+- `FIREBASE_STAGING_PROJECT`
 
-## 7. India-Focused Production Recommendations
-
-- Add district-level agronomy data and weather APIs (IMD + satellite indices)
-- Integrate local language ASR/TTS providers for better rural accent coverage
-- Include FPO/NGO operator dashboard for assisted onboarding
-- Add Aadhaar-independent identity fallback (mobile OTP + village/FPO verification)
-- Add audit-ready MRV evidence pipeline (geo-tagged photos, soil test uploads, verifier workflows)
-
-## 8. Next Build Stages
-
-1. Replace heuristic MRV with calibrated models trained on pilot farm datasets.
-2. Introduce model monitoring and drift detection.
-3. Add offline-first PWA flows and sync queue for low-connectivity villages.
-4. Add carbon credit registry integration and payment rails.
-
-## 9. Important Note
-
-The current AI logic is a strong implementation baseline for hackathon-to-MVP transition, not a certified carbon accounting engine. For credit issuance, you must include approved MRV protocols, third-party audits, and jurisdiction-specific compliance.
+## Production Notes
+- Current model pipeline is deployment-ready scaffolding, not certification-grade MRV.
+- Carbon credit issuance still requires approved protocol mapping, verifier workflows, and audit evidence integrity checks.

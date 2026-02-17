@@ -22,5 +22,23 @@ service cloud.firestore {
     match /voice_sessions/{sessionId} {
       allow read, write: if isSignedIn();
     }
+
+    match /evidence_uploads/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.farmerId is string;
+      allow update, delete: if false;
+    }
+
+    match /soil_tests/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.farmerId is string;
+      allow update, delete: if false;
+    }
+
+    match /audit_trail/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.farmerId is string;
+      allow update, delete: if false;
+    }
   }
 }
