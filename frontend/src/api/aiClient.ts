@@ -1,11 +1,18 @@
 import type { FarmProfile, LanguageCode, MrvEstimateResponse, PracticeType, RecommendationItem } from "../types";
+import { auth } from "./firebase";
 
 const API_BASE = import.meta.env.VITE_AI_API_BASE || "http://localhost:8000/api/v1";
 
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await auth.currentUser?.getIdToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function fetchMrvEstimate(profile: FarmProfile, practices: PracticeType[]): Promise<MrvEstimateResponse> {
+  const headers = await authHeaders();
   const response = await fetch(`${API_BASE}/mrv/estimate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify({
       profile,
       practices,
@@ -19,9 +26,10 @@ export async function fetchMrvEstimate(profile: FarmProfile, practices: Practice
 }
 
 export async function fetchRecommendations(profile: FarmProfile, objective: "carbon" | "yield" | "cost" | "water") {
+  const headers = await authHeaders();
   const response = await fetch(`${API_BASE}/recommendations`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify({
       profile,
       current_practices: [],
@@ -35,9 +43,10 @@ export async function fetchRecommendations(profile: FarmProfile, objective: "car
 }
 
 export async function parseVoiceIntent(transcript: string, language: LanguageCode) {
+  const headers = await authHeaders();
   const response = await fetch(`${API_BASE}/voice/intent`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify({ transcript, language }),
   });
 

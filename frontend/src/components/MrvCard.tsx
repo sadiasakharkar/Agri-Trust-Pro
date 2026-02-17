@@ -14,6 +14,7 @@ export function MrvCard({ result }: { result: MrvEstimateResponse | null }) {
       <h3>Estimated Annual Carbon</h3>
       <p className="metric">{result.estimated_annual_co2e_tons} tCO2e</p>
       <p>Confidence: {(result.confidence_score * 100).toFixed(0)}%</p>
+      <p>Model: {result.model_version}</p>
       <p className="small">{result.explanation}</p>
     </div>
   );

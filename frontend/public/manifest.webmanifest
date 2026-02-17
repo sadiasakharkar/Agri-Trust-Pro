@@ -1,0 +1,9 @@
+{
+  "name": "Agri-Trust Farmer App",
+  "short_name": "Agri-Trust",
+  "description": "Carbon MRV and advisory assistant for Indian farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f8df",
+  "theme_color": "#1b8f5a"
+}

@@ -134,6 +134,32 @@ select {
   margin-top: 0.5rem;
 }
 
+.sync-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.8rem;
+}
+
+.status-chip {
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  background: #ecefe5;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status-chip.online {
+  background: #d8efdf;
+  color: #14653f;
+}
+
+.status-chip.offline {
+  background: #f7e6d7;
+  color: #8e4b11;
+}
+
 .metric {
   font-size: 2rem;
   font-weight: 700;
@@ -175,9 +201,14 @@ select {
     flex-direction: column;
   }
 
-  .primary-button,
-  .secondary-button,
-  .voice-button {
+.primary-button,
+.secondary-button,
+.voice-button {
     width: 100%;
   }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -26,6 +26,7 @@ export interface MrvEstimateResponse {
   estimated_annual_co2e_tons: number;
   confidence_score: number;
   mrv_method: string;
+  model_version: string;
   explanation: string;
 }
 
