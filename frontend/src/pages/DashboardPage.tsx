@@ -6,6 +6,7 @@ import { db } from "../api/firebase";
 import { MrvCard } from "../components/MrvCard";
 import { RecommendationList } from "../components/RecommendationList";
 import { EvidenceRecorder } from "../components/EvidenceRecorder";
+import { VerifierQueue } from "../components/VerifierQueue";
 import { INDIA_STATES } from "../constants/india";
 import { useLanguage } from "../context/LanguageContext";
 import { useOfflineQueue } from "../hooks/useOfflineQueue";
@@ -44,7 +45,7 @@ export function DashboardPage() {
   const [voiceText, setVoiceText] = useState("");
   const [statusMessage, setStatusMessage] = useState<string>("");
 
-  const { items, enqueue, dequeue, isOnline } = useOfflineQueue();
+  const { items, enqueue, bumpRetry, dequeue, isOnline } = useOfflineQueue();
   const { startListening, stopListening, isListening, speak } = useVoiceAssistant(language);
 
   const selectedPractices: PracticeType[] = useMemo(() => ["cover_crop", "reduced_till"], []);
@@ -110,6 +111,7 @@ export function DashboardPage() {
         dequeue(item.id);
       } catch (error) {
         console.error(error);
+        bumpRetry(item.id);
       }
     }
 
@@ -194,6 +196,9 @@ export function DashboardPage() {
             {isOnline ? "Online" : "Offline"}
           </span>
           <span className="status-chip">Queued: {items.length}</span>
+          <span className="status-chip">
+            Retries: {items.reduce((sum, item) => sum + item.retryCount, 0)}
+          </span>
           <button className="secondary-button" type="button" onClick={syncQueue} disabled={!isOnline || !items.length}>
             Sync Pending
           </button>
@@ -206,6 +211,7 @@ export function DashboardPage() {
       <MrvCard result={mrv} />
       <RecommendationList items={recommendations} />
       <EvidenceRecorder farmerId={profile.farmer_id} />
+      <VerifierQueue />
     </main>
   );
 }

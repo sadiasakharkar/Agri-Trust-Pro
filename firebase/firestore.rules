@@ -26,7 +26,8 @@ service cloud.firestore {
     match /evidence_uploads/{docId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.farmerId is string;
-      allow update, delete: if false;
+      allow update: if isSignedIn();
+      allow delete: if false;
     }
 
     match /soil_tests/{docId} {
@@ -36,6 +37,12 @@ service cloud.firestore {
     }
 
     match /audit_trail/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.farmerId is string;
+      allow update, delete: if false;
+    }
+
+    match /verification_reviews/{docId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.farmerId is string;
       allow update, delete: if false;

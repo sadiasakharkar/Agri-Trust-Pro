@@ -24,8 +24,10 @@ Production-style full-stack project combining farmer-first UX, FastAPI AI servic
 - Guided farm profile workflow for low-literacy users
 - Voice input + spoken response loop
 - Offline queue for failed requests and manual sync action
+- Retry-aware offline queue with duplicate suppression
 - PWA manifest and service worker registration
 - Evidence capture form (geo + soil) for MRV audit trails
+- Verifier review queue for approve/reject workflows
 
 ### FastAPI AI Service
 - `POST /api/v1/mrv/estimate`
@@ -33,6 +35,7 @@ Production-style full-stack project combining farmer-first UX, FastAPI AI servic
 - `POST /api/v1/recommendations`
 - `POST /api/v1/voice/intent`
 - `POST /api/v1/integrations/vishnu/webhook`
+- `GET /api/v1/ops/metrics`
 - Request tracing (`X-Request-ID`), rate limiting, centralized error handling
 - Optional auth enforcement:
   - `AUTH_REQUIRED=false` (default dev)
@@ -41,9 +44,11 @@ Production-style full-stack project combining farmer-first UX, FastAPI AI servic
 ### Model Pipeline
 - Hybrid inference path: model artifact if available, heuristic fallback otherwise
 - Training script: `ai-service/ml/train_mrv_model.py`
+- Sample dataset generator: `ai-service/ml/generate_sample_dataset.py`
 - Artifact registry:
   - `ai-service/app/models/artifacts/mrv_model.joblib`
   - `ai-service/app/models/artifacts/mrv_model_meta.json`
+- Current trained baseline artifact version: `mrv_rf_v1`
 
 ### Firebase
 - Security rules for `farmers`, `mrv_estimates`, `voice_sessions`, `evidence_uploads`, `soil_tests`, `audit_trail`
@@ -138,3 +143,4 @@ Staging rollout checklist:
 ## Production Notes
 - Current model pipeline is deployment-ready scaffolding, not certification-grade MRV.
 - Carbon credit issuance still requires approved protocol mapping, verifier workflows, and audit evidence integrity checks.
+- Observability baseline and next steps: `docs/observability.md`
