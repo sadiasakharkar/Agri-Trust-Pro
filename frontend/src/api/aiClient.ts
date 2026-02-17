@@ -5,7 +5,12 @@ const API_BASE = import.meta.env.VITE_AI_API_BASE || "http://localhost:8000/api/
 
 async function authHeaders(): Promise<Record<string, string>> {
   const token = await auth.currentUser?.getIdToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+
+  const devToken = import.meta.env.VITE_DEV_BEARER_TOKEN;
+  return devToken ? { Authorization: `Bearer ${devToken}` } : {};
 }
 
 export async function fetchMrvEstimate(profile: FarmProfile, practices: PracticeType[]): Promise<MrvEstimateResponse> {

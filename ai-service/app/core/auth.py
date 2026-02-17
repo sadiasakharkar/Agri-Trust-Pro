@@ -65,3 +65,8 @@ def get_current_user(
 
     request.state.user = user
     return CurrentUser(user)
+
+
+def reset_auth_cache() -> None:
+    _auth_mode.cache_clear()
+    _auth_required.cache_clear()

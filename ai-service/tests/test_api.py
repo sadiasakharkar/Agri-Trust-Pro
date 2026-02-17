@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.core.auth import reset_auth_cache
 from app.main import app
 
 
@@ -61,3 +62,61 @@ def test_evidence_validation() -> None:
 def test_rate_limit_header() -> None:
     response = client.get("/health")
     assert response.headers.get("x-request-id")
+
+
+def test_auth_required_rejects_missing_token(monkeypatch) -> None:
+    monkeypatch.setenv("AUTH_REQUIRED", "true")
+    monkeypatch.setenv("AUTH_PROVIDER", "dev")
+    monkeypatch.setenv("DEV_BEARER_TOKEN", "test-token")
+    reset_auth_cache()
+
+    payload = {
+        "profile": {
+            "farmer_id": "f-001",
+            "state": "Maharashtra",
+            "district": "Nashik",
+            "farm_size_hectares": 2.4,
+            "crop": "millets",
+            "irrigation_type": "rainfed",
+            "soil_organic_carbon_pct": 0.9,
+            "language": "hi",
+        },
+        "practices": ["cover_crop", "reduced_till"],
+        "baseline_yield_ton_per_hectare": 1.8,
+    }
+    response = client.post("/api/v1/mrv/estimate", json=payload)
+    assert response.status_code == 401
+
+    monkeypatch.setenv("AUTH_REQUIRED", "false")
+    reset_auth_cache()
+
+
+def test_auth_required_accepts_valid_dev_token(monkeypatch) -> None:
+    monkeypatch.setenv("AUTH_REQUIRED", "true")
+    monkeypatch.setenv("AUTH_PROVIDER", "dev")
+    monkeypatch.setenv("DEV_BEARER_TOKEN", "test-token")
+    reset_auth_cache()
+
+    payload = {
+        "profile": {
+            "farmer_id": "f-001",
+            "state": "Maharashtra",
+            "district": "Nashik",
+            "farm_size_hectares": 2.4,
+            "crop": "millets",
+            "irrigation_type": "rainfed",
+            "soil_organic_carbon_pct": 0.9,
+            "language": "hi",
+        },
+        "practices": ["cover_crop", "reduced_till"],
+        "baseline_yield_ton_per_hectare": 1.8,
+    }
+    response = client.post(
+        "/api/v1/mrv/estimate",
+        json=payload,
+        headers={"Authorization": "Bearer test-token"},
+    )
+    assert response.status_code == 200
+
+    monkeypatch.setenv("AUTH_REQUIRED", "false")
+    reset_auth_cache()

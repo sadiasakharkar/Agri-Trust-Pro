@@ -107,6 +107,7 @@ docker compose up --build
 - `DEV_BEARER_TOKEN`
 - `RATE_LIMIT_PER_MINUTE`
 - `RATE_LIMIT_WINDOW_SECONDS`
+- For production baseline, see `ai-service/.env.production.example`
 
 ### `frontend/.env`
 - `VITE_AI_API_BASE`
@@ -116,6 +117,7 @@ docker compose up --build
 - `VITE_FIREBASE_STORAGE_BUCKET`
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
+- `VITE_DEV_BEARER_TOKEN` (optional; for local testing when FastAPI uses dev auth mode)
 
 ## CI/CD
 - CI workflow: `.github/workflows/ci.yml`
@@ -129,6 +131,9 @@ docker compose up --build
 Required GitHub secrets:
 - `FIREBASE_TOKEN`
 - `FIREBASE_STAGING_PROJECT`
+
+Staging rollout checklist:
+- `docs/deploy-staging.md`
 
 ## Production Notes
 - Current model pipeline is deployment-ready scaffolding, not certification-grade MRV.
