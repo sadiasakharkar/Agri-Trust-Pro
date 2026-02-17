@@ -10,11 +10,16 @@ Auth:
 
 ## POST `/mrv/estimate`
 - Input: farm profile, selected practices, baseline yield
-- Output: annual tCO2e estimate, confidence, model version, explanation
+- Output: annual tCO2e estimate, confidence, data quality score/warnings, model version, explanation
 
 ## POST `/mrv/evidence/validate`
 - Input: farmer ID, latitude, longitude, soil organic carbon
 - Output: validation result, issues list, recommendation
+
+## POST `/mrv/evidence/transition`
+- Input: evidence id, target status (`draft|submitted|in_review|approved|rejected`)
+- Access: `verifier` or `admin` role
+- Output: transition decision and message
 
 ## POST `/recommendations`
 - Input: farm profile + objective (`carbon`, `yield`, `cost`, `water`)
@@ -26,6 +31,7 @@ Auth:
 
 ## GET `/ops/metrics`
 - Output: request counters by path/status and MRV model-version usage counters
+- Access: `verifier` or `admin` role
 
 ## POST `/integrations/vishnu/webhook`
 - Header: `x-vishnu-secret`

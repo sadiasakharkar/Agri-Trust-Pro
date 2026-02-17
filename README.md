@@ -32,11 +32,13 @@ Production-style full-stack project combining farmer-first UX, FastAPI AI servic
 ### FastAPI AI Service
 - `POST /api/v1/mrv/estimate`
 - `POST /api/v1/mrv/evidence/validate`
+- `POST /api/v1/mrv/evidence/transition` (verifier/admin)
 - `POST /api/v1/recommendations`
 - `POST /api/v1/voice/intent`
 - `POST /api/v1/integrations/vishnu/webhook`
 - `GET /api/v1/ops/metrics`
 - Request tracing (`X-Request-ID`), rate limiting, centralized error handling
+- Data-quality scoring and warning flags in MRV response
 - Optional auth enforcement:
   - `AUTH_REQUIRED=false` (default dev)
   - `AUTH_PROVIDER=dev|firebase`
@@ -49,9 +51,10 @@ Production-style full-stack project combining farmer-first UX, FastAPI AI servic
   - `ai-service/app/models/artifacts/mrv_model.joblib`
   - `ai-service/app/models/artifacts/mrv_model_meta.json`
 - Current trained baseline artifact version: `mrv_rf_v1`
+- Automated quality gate script: `ai-service/ml/quality_gate.py`
 
 ### Firebase
-- Security rules for `farmers`, `mrv_estimates`, `voice_sessions`, `evidence_uploads`, `soil_tests`, `audit_trail`
+- Security rules for `farmers`, `mrv_estimates`, `voice_sessions`, `evidence_uploads`, `soil_tests`, `audit_trail`, `verification_reviews`
 - Cloud Function relay for Vishnu voice webhook orchestration
 
 ## Local Setup
@@ -110,6 +113,7 @@ docker compose up --build
 - `AUTH_REQUIRED`
 - `AUTH_PROVIDER`
 - `DEV_BEARER_TOKEN`
+- `DEV_BEARER_ROLE`
 - `RATE_LIMIT_PER_MINUTE`
 - `RATE_LIMIT_WINDOW_SECONDS`
 - For production baseline, see `ai-service/.env.production.example`
@@ -127,6 +131,7 @@ docker compose up --build
 ## CI/CD
 - CI workflow: `.github/workflows/ci.yml`
   - FastAPI tests
+  - Model quality gate
   - Frontend build
   - Firebase functions build
 - Staging deployment workflow: `.github/workflows/deploy-staging.yml`
@@ -144,3 +149,4 @@ Staging rollout checklist:
 - Current model pipeline is deployment-ready scaffolding, not certification-grade MRV.
 - Carbon credit issuance still requires approved protocol mapping, verifier workflows, and audit evidence integrity checks.
 - Observability baseline and next steps: `docs/observability.md`
+- KPI dashboard targets: `docs/quality-kpis.md`

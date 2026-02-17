@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onIdTokenChanged } from "firebase/auth";
 
 import { auth } from "./api/firebase";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
@@ -10,9 +10,29 @@ import { LoginPage } from "./pages/LoginPage";
 function AppShell() {
   const { t } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<"farmer" | "verifier" | "admin">("farmer");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => setIsAuthenticated(Boolean(user)));
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      setIsAuthenticated(Boolean(user));
+      if (!user) {
+        setRole("farmer");
+        return;
+      }
+
+      try {
+        const tokenResult = await user.getIdTokenResult();
+        const claimRole = String(tokenResult.claims.role || "farmer");
+        if (claimRole === "admin" || claimRole === "verifier") {
+          setRole(claimRole);
+        } else {
+          setRole("farmer");
+        }
+      } catch (error) {
+        console.error(error);
+        setRole("farmer");
+      }
+    });
     return () => unsubscribe();
   }, []);
 
@@ -29,7 +49,11 @@ function AppShell() {
         </div>
       </header>
 
-      {isAuthenticated ? <DashboardPage /> : <LoginPage onAuthenticated={() => setIsAuthenticated(true)} />}
+      {isAuthenticated ? (
+        <DashboardPage canReviewEvidence={role === "admin" || role === "verifier"} />
+      ) : (
+        <LoginPage onAuthenticated={() => setIsAuthenticated(true)} />
+      )}
     </div>
   );
 }

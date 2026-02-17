@@ -16,6 +16,8 @@ PracticeType = Literal[
     "residue_retention",
 ]
 
+EvidenceStatus = Literal["draft", "submitted", "in_review", "approved", "rejected"]
+
 
 class FarmProfile(BaseModel):
     farmer_id: str
@@ -38,6 +40,8 @@ class MrvEstimateRequest(BaseModel):
 class MrvEstimateResponse(BaseModel):
     estimated_annual_co2e_tons: float
     confidence_score: float
+    data_quality_score: float
+    data_quality_warnings: list[str]
     mrv_method: str
     model_version: str
     explanation: str
@@ -83,6 +87,20 @@ class EvidenceValidationResponse(BaseModel):
     valid: bool
     issues: list[str]
     recommendation: str
+
+
+class EvidenceTransitionRequest(BaseModel):
+    evidence_id: str
+    to_status: EvidenceStatus
+    note: str | None = None
+
+
+class EvidenceTransitionResponse(BaseModel):
+    evidence_id: str
+    from_status: EvidenceStatus
+    to_status: EvidenceStatus
+    allowed: bool
+    message: str
 
 
 class VishnuWebhookRequest(BaseModel):

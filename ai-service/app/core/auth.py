@@ -25,9 +25,10 @@ def _auth_required() -> bool:
 
 def _verify_dev_token(token: str) -> dict:
     expected = os.getenv("DEV_BEARER_TOKEN", "dev-token")
+    role = os.getenv("DEV_BEARER_ROLE", "admin")
     if token != expected:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid dev bearer token")
-    return {"uid": "dev-user", "provider": "dev"}
+    return {"uid": "dev-user", "provider": "dev", "role": role}
 
 
 def _verify_firebase_token(token: str) -> dict:
@@ -39,7 +40,8 @@ def _verify_firebase_token(token: str) -> dict:
             firebase_admin.initialize_app()
 
         decoded = auth.verify_id_token(token)
-        return {"uid": decoded.get("uid", "unknown"), "provider": "firebase"}
+        role = decoded.get("role", "farmer")
+        return {"uid": decoded.get("uid", "unknown"), "provider": "firebase", "role": role}
     except Exception as exc:  # pragma: no cover
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token") from exc
 
@@ -49,7 +51,7 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> CurrentUser:
     if not _auth_required():
-        request.state.user = {"uid": "anonymous", "provider": "none"}
+        request.state.user = {"uid": "anonymous", "provider": "none", "role": "admin"}
         return CurrentUser(request.state.user)
 
     if credentials is None:
@@ -65,6 +67,18 @@ def get_current_user(
 
     request.state.user = user
     return CurrentUser(user)
+
+
+def require_roles(*allowed_roles: str):
+    allowed = set(allowed_roles)
+
+    def dependency(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+        role = str(user.get("role", "farmer"))
+        if role not in allowed:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
+        return user
+
+    return dependency
 
 
 def reset_auth_cache() -> None:

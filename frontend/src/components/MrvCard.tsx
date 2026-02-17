@@ -21,9 +21,21 @@ export function MrvCard({ result }: { result: MrvEstimateResponse | null }) {
         <strong>{(result.confidence_score * 100).toFixed(0)}%</strong>
       </div>
       <div className="data-row">
+        <span>Data quality</span>
+        <strong>{(result.data_quality_score * 100).toFixed(0)}%</strong>
+      </div>
+      <div className="data-row">
         <span>Model</span>
         <strong>{result.model_version}</strong>
       </div>
+      {result.data_quality_warnings.length > 0 ? (
+        <div className="warning-box">
+          <p className="small"><strong>Quality checks:</strong></p>
+          {result.data_quality_warnings.map((warning) => (
+            <p key={warning} className="small">- {warning}</p>
+          ))}
+        </div>
+      ) : null}
       <p className="small">{result.explanation}</p>
     </article>
   );

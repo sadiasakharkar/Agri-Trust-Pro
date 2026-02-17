@@ -38,7 +38,7 @@ interface QueuedCall {
 
 const objectives: Objective[] = ["carbon", "yield", "cost", "water"];
 
-export function DashboardPage() {
+export function DashboardPage({ canReviewEvidence }: { canReviewEvidence: boolean }) {
   const { t, language } = useLanguage();
   const [profile, setProfile] = useState<FarmProfile>({ ...defaultProfile, language });
   const [mrv, setMrv] = useState<MrvEstimateResponse | null>(null);
@@ -237,7 +237,7 @@ export function DashboardPage() {
         <MrvCard result={mrv} />
         <RecommendationList items={recommendations} />
         <EvidenceRecorder farmerId={profile.farmer_id} />
-        <VerifierQueue />
+        {canReviewEvidence ? <VerifierQueue /> : null}
       </section>
     </main>
   );

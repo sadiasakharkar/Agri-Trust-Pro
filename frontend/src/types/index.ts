@@ -25,6 +25,8 @@ export interface FarmProfile {
 export interface MrvEstimateResponse {
   estimated_annual_co2e_tons: number;
   confidence_score: number;
+  data_quality_score: number;
+  data_quality_warnings: string[];
   mrv_method: string;
   model_version: string;
   explanation: string;

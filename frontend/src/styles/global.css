@@ -334,6 +334,14 @@ select:focus {
   padding: 0.16rem 0.58rem;
 }
 
+.warning-box {
+  margin: 0.5rem 0;
+  border: 1px solid #efd7ae;
+  background: #fff8e9;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.65rem;
+}
+
 .status-inline {
   margin-top: 0.6rem;
   font-size: 0.9rem;
