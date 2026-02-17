@@ -1,0 +1,183 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap");
+
+:root {
+  --bg: linear-gradient(165deg, #f6f8df 0%, #ddf0d2 45%, #c7e6cf 100%);
+  --card: #ffffff;
+  --ink: #1a2f1a;
+  --accent: #1b8f5a;
+  --accent-strong: #116841;
+  --warning: #b96b1a;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Baloo 2", "Noto Sans Devanagari", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+p {
+  margin: 0.3rem 0;
+}
+
+.pill-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  background: #e9f5df;
+  cursor: pointer;
+}
+
+.pill.active {
+  background: var(--accent);
+  color: white;
+}
+
+.card,
+.hero-card,
+.auth-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(26, 47, 26, 0.12);
+}
+
+.auth-layout {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+}
+
+.auth-card {
+  width: min(420px, 95%);
+}
+
+.dashboard-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero-card {
+  border: 2px solid rgba(27, 143, 90, 0.2);
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #bed9c2;
+  margin-bottom: 0.7rem;
+  font-size: 1rem;
+}
+
+.primary-button,
+.secondary-button,
+.voice-button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-weight: 700;
+  min-width: 140px;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: white;
+}
+
+.secondary-button {
+  background: #e6f3e9;
+  color: var(--ink);
+}
+
+.voice-button {
+  background: #d4ebf8;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.metric {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.recommendation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.recommendation-list li {
+  padding: 0.7rem;
+  background: #f1f9f2;
+  border-radius: 12px;
+}
+
+.small {
+  font-size: 0.92rem;
+}
+
+.muted {
+  background: #f9fbf6;
+}
+
+.success {
+  border-left: 6px solid var(--accent);
+}
+
+.error-text {
+  color: #bd2525;
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .voice-button {
+    width: 100%;
+  }
+}
