@@ -39,6 +39,7 @@ class MrvEstimateResponse(BaseModel):
     estimated_annual_co2e_tons: float
     confidence_score: float
     mrv_method: str
+    model_version: str
     explanation: str
 
 
@@ -69,6 +70,19 @@ class VoiceIntentResponse(BaseModel):
     intent: Literal["get_recommendations", "get_carbon_score", "unknown"]
     confidence: float
     response_text: str
+
+
+class EvidenceValidationRequest(BaseModel):
+    farmer_id: str
+    latitude: float
+    longitude: float
+    soil_organic_carbon_pct: float = Field(ge=0, le=10)
+
+
+class EvidenceValidationResponse(BaseModel):
+    valid: bool
+    issues: list[str]
+    recommendation: str
 
 
 class VishnuWebhookRequest(BaseModel):

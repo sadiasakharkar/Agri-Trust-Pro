@@ -32,6 +32,7 @@ def test_mrv_estimate() -> None:
     data = response.json()
     assert data["estimated_annual_co2e_tons"] > 0
     assert data["confidence_score"] >= 0.6
+    assert "model_version" in data
 
 
 def test_voice_intent() -> None:
@@ -41,3 +42,22 @@ def test_voice_intent() -> None:
     )
     assert response.status_code == 200
     assert response.json()["intent"] == "get_carbon_score"
+
+
+def test_evidence_validation() -> None:
+    response = client.post(
+        "/api/v1/mrv/evidence/validate",
+        json={
+            "farmer_id": "f-001",
+            "latitude": 19.07,
+            "longitude": 72.87,
+            "soil_organic_carbon_pct": 0.8,
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["valid"] is True
+
+
+def test_rate_limit_header() -> None:
+    response = client.get("/health")
+    assert response.headers.get("x-request-id")
