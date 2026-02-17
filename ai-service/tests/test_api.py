@@ -64,6 +64,14 @@ def test_rate_limit_header() -> None:
     assert response.headers.get("x-request-id")
 
 
+def test_ops_metrics_endpoint() -> None:
+    client.get("/health")
+    response = client.get("/api/v1/ops/metrics")
+    assert response.status_code == 200
+    data = response.json()
+    assert "requests_by_path" in data
+
+
 def test_auth_required_rejects_missing_token(monkeypatch) -> None:
     monkeypatch.setenv("AUTH_REQUIRED", "true")
     monkeypatch.setenv("AUTH_PROVIDER", "dev")

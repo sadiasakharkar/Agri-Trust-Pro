@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.config import settings
+from app.core.monitoring import metrics_store
 from app.models.schemas import (
     EvidenceValidationRequest,
     EvidenceValidationResponse,
@@ -29,6 +30,7 @@ def mrv_estimate(payload: MrvEstimateRequest, _: CurrentUser = Depends(get_curre
         list(payload.practices),
         payload.baseline_yield_ton_per_hectare,
     )
+    metrics_store.record_model_usage(model_version)
     return MrvEstimateResponse(
         estimated_annual_co2e_tons=estimate,
         confidence_score=confidence,
@@ -62,6 +64,11 @@ def recommendations(payload: RecommendationRequest, _: CurrentUser = Depends(get
 def voice_intent(payload: VoiceIntentRequest, _: CurrentUser = Depends(get_current_user)) -> VoiceIntentResponse:
     intent, confidence, response = infer_intent(payload)
     return VoiceIntentResponse(intent=intent, confidence=confidence, response_text=response)
+
+
+@router.get("/ops/metrics")
+def ops_metrics(_: CurrentUser = Depends(get_current_user)) -> dict[str, dict[str, int]]:
+    return metrics_store.snapshot()
 
 
 @router.post("/integrations/vishnu/webhook", response_model=VishnuWebhookResponse)

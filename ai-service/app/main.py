@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from app.api.routes import router
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.core.monitoring import metrics_store
 from app.core.rate_limit import enforce_rate_limit
 
 setup_logging()
@@ -55,6 +56,7 @@ async def request_context_middleware(request: Request, call_next):
 
     elapsed_ms = round((time.perf_counter() - started) * 1000, 2)
     response.headers["X-Request-ID"] = request_id
+    metrics_store.record_request(request.url.path, response.status_code)
     logger.info(
         "request_complete request_id=%s method=%s path=%s status=%s duration_ms=%s",
         request_id,

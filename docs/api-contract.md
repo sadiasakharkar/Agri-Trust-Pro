@@ -24,6 +24,9 @@ Auth:
 - Input: transcript + language (`en`, `hi`, `mr`)
 - Output: intent + confidence + localized response text
 
+## GET `/ops/metrics`
+- Output: request counters by path/status and MRV model-version usage counters
+
 ## POST `/integrations/vishnu/webhook`
 - Header: `x-vishnu-secret`
 - Input: `session_id`, `utterance`, `language`

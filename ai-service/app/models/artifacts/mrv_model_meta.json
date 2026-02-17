@@ -1,0 +1,16 @@
+{
+  "mae": 0.6079,
+  "r2": 0.908,
+  "train_rows": 320,
+  "test_rows": 80,
+  "feature_columns": [
+    "farm_size_hectares",
+    "state_factor",
+    "soil_organic_carbon_pct",
+    "baseline_yield_ton_per_hectare",
+    "practice_score"
+  ],
+  "target_column": "target_co2e",
+  "model_type": "RandomForestRegressor",
+  "model_version": "mrv_rf_v1"
+}
